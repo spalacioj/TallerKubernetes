@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+
+  db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: api_peliculas
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    command: sh -c "flask db upgrade && flask run --host=0.0.0.0"
+    volumes:
+    - .:/app
+    ports:
+    - 5000:5000
+    environment:
+      FLASK_APP: "entrypoint:app"
+      FLASK_ENV: "development"
+      APP_SETTINGS_MODULE: "config.default"
+      DB_URI: "postgresql://postgres:password@db:5432/api_peliculas"
+    depends_on:
+      - db
+
+volumes:
+  pg_data:
